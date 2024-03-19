@@ -1,3 +1,5 @@
+import '@/app/ui/global.css';
+import { poor_story } from './ui/fonts';
 export default function RootLayout({
   children,
 }: {
@@ -5,7 +7,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body className={`${poor_story.className} antialiased`}>{children}</body>
     </html>
   );
 }
