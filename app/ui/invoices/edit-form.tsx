@@ -1,14 +1,15 @@
 'use client';
 
-import { CustomerField, InvoiceForm } from '@/app/lib/definitions';
 import {
   CheckIcon,
   ClockIcon,
   CurrencyDollarIcon,
   UserCircleIcon,
 } from '@heroicons/react/24/outline';
-import Link from 'next/link';
+import { CustomerField, InvoiceForm } from '@/app/lib/definitions';
+
 import { Button } from '@/app/ui/button';
+import Link from 'next/link';
 import { updateInvoice } from '@/app/lib/actions';
 import { useFormState } from 'react-dom';
 
@@ -20,10 +21,12 @@ export default function EditInvoiceForm({
   customers: CustomerField[];
 }) {
   const updateInvoiceWithId = updateInvoice.bind(null, invoice.id);
-  const initialState = {};
+  const initialState = { message: null, error: {} };
   const [state, dispatch] = useFormState(updateInvoiceWithId, initialState);
+
+  console.log('use form state => ', state.errors?.amount);
   return (
-    <form action={dispatch}>
+    <form action={dispatch} aria-describedby="form-error">
       <div className="rounded-md bg-gray-50 p-4 md:p-6">
         {/* Customer Name */}
         <div className="mb-4">
@@ -65,9 +68,18 @@ export default function EditInvoiceForm({
                 defaultValue={invoice.amount}
                 placeholder="Enter USD amount"
                 className="peer block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
+                aria-describedby="amount-error"
               />
               <CurrencyDollarIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
             </div>
+          </div>
+          <div id="amount-error" aria-live="polite" aria-atomic="true">
+            {state.errors?.amount &&
+              state.errors.amount.map((error: string) => (
+                <p className="mt-2 text-sm text-red-500" key={error}>
+                  {error}
+                </p>
+              ))}
           </div>
         </div>
 
@@ -113,6 +125,11 @@ export default function EditInvoiceForm({
             </div>
           </div>
         </fieldset>
+        {state.message && (
+          <div id="form-error" aria-live="polite" aria-atomic="true">
+            <p className="mt-2 text-sm text-red-500">{state.message}</p>
+          </div>
+        )}
       </div>
       <div className="mt-6 flex justify-end gap-4">
         <Link

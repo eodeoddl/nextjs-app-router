@@ -1,8 +1,10 @@
 'use server';
 
-import { sql } from '@vercel/postgres';
-import { revalidatePath } from 'next/cache';
+import { AuthError } from 'next-auth';
 import { redirect } from 'next/navigation';
+import { revalidatePath } from 'next/cache';
+import { signIn } from '@/auth';
+import { sql } from '@vercel/postgres';
 import { z } from 'zod';
 
 const FormSchema = z.object({
@@ -60,16 +62,26 @@ export async function createInvoice(prevState: State, formData: FormData) {
 
 const UpdateInvoice = FormSchema.omit({ id: true, date: true });
 
-export async function updateInvoice(id: string, formData: FormData) {
-  const { customerId, amount, status } = UpdateInvoice.parse(
-    Object.fromEntries(formData),
-  );
+export async function updateInvoice(
+  id: string,
+  prevState: State,
+  formData: FormData,
+) {
+  const validatedfields = UpdateInvoice.safeParse(Object.fromEntries(formData));
 
+  if (!validatedfields.success) {
+    return {
+      errors: validatedfields.error.flatten().fieldErrors,
+      message: 'Missing Feilds. failed to Update Invoice',
+    };
+  }
+
+  const { customerId, amount, status } = validatedfields.data;
   const amountInCents = amount * 100;
 
   await sql`
     UPDATE invoices
-    SET customer_id = ${customerId}, amount =  ${amountInCents}, status = ${status}
+    SET customer_id = ${customerId}, amount = ${amountInCents}, status = ${status}
     WHERE id = ${id}
   `;
 
@@ -80,4 +92,24 @@ export async function updateInvoice(id: string, formData: FormData) {
 export async function deleteInvoice(id: string) {
   await sql`DELETE FROM invoices where id = ${id}`;
   revalidatePath('/dashboard/invoices');
+}
+
+export async function authenticate(
+  prevState: string | undefined,
+  formData: FormData,
+) {
+  console.log('server action login', formData);
+  try {
+    await signIn('credentials', formData);
+  } catch (error) {
+    if (error instanceof AuthError) {
+      switch (error.type) {
+        case 'CredentialsSignin':
+          return 'Invalid credentials';
+        default:
+          return 'Something went wrong';
+      }
+    }
+    return error;
+  }
 }

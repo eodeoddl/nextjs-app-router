@@ -1,13 +1,15 @@
 'use client';
-import { CustomerField } from '@/app/lib/definitions';
-import Link from 'next/link';
+
 import {
   CheckIcon,
   ClockIcon,
   CurrencyDollarIcon,
   UserCircleIcon,
 } from '@heroicons/react/24/outline';
+
 import { Button } from '@/app/ui/button';
+import { CustomerField } from '@/app/lib/definitions';
+import Link from 'next/link';
 import { createInvoice } from '@/app/lib/actions';
 import { useFormState } from 'react-dom';
 
@@ -18,7 +20,7 @@ export default function Form({ customers }: { customers: CustomerField[] }) {
   console.log('use formState => ', state);
 
   return (
-    <form action={dispatch}>
+    <form action={dispatch} aria-describedby="form-error">
       <div className="rounded-md bg-gray-50 p-4 md:p-6">
         {/* Customer Name */}
         <div className="mb-4">
@@ -88,10 +90,7 @@ export default function Form({ customers }: { customers: CustomerField[] }) {
           <legend className="mb-2 block text-sm font-medium">
             Set the invoice status
           </legend>
-          <div
-            className="rounded-md border border-gray-200 bg-white px-[14px] py-3"
-            aria-describedby="status-error"
-          >
+          <div className="rounded-md border border-gray-200 bg-white px-[14px] py-3">
             <div className="flex gap-4">
               <div className="flex items-center">
                 <input
@@ -100,6 +99,7 @@ export default function Form({ customers }: { customers: CustomerField[] }) {
                   type="radio"
                   value="pending"
                   className="h-4 w-4 cursor-pointer border-gray-300 bg-gray-100 text-gray-600 focus:ring-2"
+                  aria-describedby="status-error"
                 />
                 <label
                   htmlFor="pending"
@@ -115,6 +115,7 @@ export default function Form({ customers }: { customers: CustomerField[] }) {
                   type="radio"
                   value="paid"
                   className="h-4 w-4 cursor-pointer border-gray-300 bg-gray-100 text-gray-600 focus:ring-2"
+                  aria-describedby="status-error"
                 />
                 <label
                   htmlFor="paid"
@@ -134,7 +135,13 @@ export default function Form({ customers }: { customers: CustomerField[] }) {
               ))}
           </div>
         </fieldset>
+        {state.message && (
+          <div id="form-error" aria-live="polite" aria-atomic="true">
+            <p className="mt-2 text-sm text-red-500">{state.message}</p>
+          </div>
+        )}
       </div>
+
       <div className="mt-6 flex justify-end gap-4">
         <Link
           href="/dashboard/invoices"
