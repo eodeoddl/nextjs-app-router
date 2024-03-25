@@ -98,11 +98,11 @@ export async function authenticate(
   prevState: string | undefined,
   formData: FormData,
 ) {
-  console.log('server action login', formData);
   try {
     await signIn('credentials', formData);
   } catch (error) {
     if (error instanceof AuthError) {
+      console.log('signIn error => ', error);
       switch (error.type) {
         case 'CredentialsSignin':
           return 'Invalid credentials';
@@ -110,6 +110,6 @@ export async function authenticate(
           return 'Something went wrong';
       }
     }
-    return error;
+    throw error;
   }
 }
