@@ -18,5 +18,9 @@ export const authConfig = {
     },
   },
   providers: [],
+<<<<<<< HEAD
   debug: true
+=======
+  // secret: process.env.AUTH_SECRET,
+>>>>>>> origin/main
 } satisfies NextAuthConfig;
