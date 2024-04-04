@@ -9,7 +9,6 @@ import { z } from 'zod';
 async function getUser(email: string): Promise<User | undefined> {
   try {
     const user = await sql<User>`SELECT * FROM users WHERE email=${email}`;
-    console.log('getUser function check => ', user, email);
     return user.rows[0];
   } catch (error) {
     throw new Error('Failed to fetch user.');
